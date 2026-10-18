@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Venta Premium</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #0f172a; padding-bottom: 90px; }
+
+        /* Banner Superior & Header */
+        header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 20px 15px 15px; text-align: center; border-bottom: 3px solid #22c55e; }
+        .logo-badge { background: #22c55e; color: #0f172a; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-bottom: 5px; }
+        header h1 { font-size: 1.4rem; font-weight: 700; }
+        header p { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 12px; }
+
+        /* Controles de Navegación */
+        .search-box { margin-bottom: 12px; }
+        .search-box input { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff; }
+        .search-box input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+
+        .categories { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn { background: #e2e8f0; color: #475569; border: none; padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
+        .cat-btn.active { background: #0284c7; color: #fff; }
+
+        /* Lista de Productos */
+        .product-grid { display: flex; flex-direction: column; gap: 12px; }
+        .product-card { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; display: flex; gap: 12px; align-items: center; }
+        .product-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
+        .product-info { flex: 1; }
+        .product-info .tag { font-size: 0.68rem; color: #0284c7; font-weight: 700; text-transform: uppercase; }
+        .product-info h3 { font-size: 0.95rem; font-weight: 600; color: #0f172a; margin: 2px 0 4px; }
+        .price { font-size: 1.05rem; font-weight: 800; color: #0f172a; }
+
+        /* Controles de Cantidad */
+        .qty-controls { display: flex; align-items: center; gap: 8px; background: #f1f5f9; border-radius: 8px; padding: 4px; }
+        .qty-btn { width: 28px; height: 28px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: bold; color: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .qty-num { font-size: 0.85rem; font-weight: 700; width: 16px; text-align: center; }
+
+        /* Barra Flotante Inferior */
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e2e8f0; padding: 12px 16px; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .cart-info span { display: block; font-size: 0.75rem; color: #64748b; }
+        .cart-info strong { font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+        .cart-actions { display: flex; gap: 8px; }
+        .btn-checkout { background: #22c55e; color: #fff; border: none; padding: 12px 16px; border-radius: 25px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+        /* Modal Carrito / Checkout */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; }
+        .modal.open { display: flex; }
+        .modal-content { background: #fff; width: 100%; max-width: 500px; margin: 0 auto; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .modal-header h2 { font-size: 1.1rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; }
+
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
+        .payment-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin: 15px 0; font-size: 0.82rem; }
+        .payment-box strong { color: #0284c7; font-size: 0.95rem; display: block; margin-top: 4px; }
+
+        .btn-finish { width: 100%; background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="logo-badge">Catálogo Oficial</span>
+        <h1 id="store-title">Nova Distribuidora Pro</h1>
+        <p>Envíos a todo el país | Pedidos directos</p>
+    </header>
+
+    <div class="container">
+        <!-- Buscador -->
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="🔍 Buscar producto o repuesto..." oninput="filtrar()">
+        </div>
+
+        <!-- Categorías -->
+        <div class="categories">
+            <button class="cat-btn active" onclick="filtrarCategoria('todas', this)">Todas</button>
+            <button class="cat-btn" onclick="filtrarCategoria('Repuestos', this)">Repuestos</button>
+            <button class="cat-btn" onclick="filtrarCategoria('Accesorios', this)">Accesorios</button>
+            <button class="cat-btn" onclick="filtrarCategoria('Herramientas', this)">Herramientas</button>
+        </div>
+
+        <!-- Grilla de Productos -->
+        <div class="product-grid" id="product-list"></div>
+    </div>
+
+    <!-- Barra Flotante de Carrito -->
+    <div class="cart-bar">
+        <div class="cart-info">
+            <span>Total en Carrito:</span>
+            <strong id="bar-total">$0</strong>
+        </div>
+        <div class="cart-actions">
+            <button class="btn-checkout" onclick="abrirModal()">🛒 Ver Pedido (<span id="bar-count">0</span>)</button>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resumen de Tu Pedido</h2>
+                <button class="close-btn" onclick="cerrarModal()">&times;</button>
+            </div>
+
+            <div id="modal-items"></div>
+
+            <div class="payment-box">
+                <p>💳 <strong>Datos para Transferencia / Mercado Pago:</strong></p>
+                <p>Alias: <strong>NOVA.DISTRIBUIDORA.MP</strong></p>
+                <p style="color:#64748b; font-size:0.75rem;">CBU/CVU de la empresa para confirmación inmediata.</p>
+            </div>
+
+            <button class="btn-finish" onclick="enviarWhatsApp()">💬 Confirmar y Enviar por WA</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN
+        const NUMERO_WA = "5491100000000"; // Reemplazar con el número del cliente
+
+        const productos = [
+            { id: 1, categoria: "Repuestos", nombre: "Kit de Mantenimiento Integral", precio: 18500, img: "https://via.placeholder.com/80" },
+            { id: 2, categoria: "Repuestos", nombre: "Filtro Multimarca Pro", precio: 9200, img: "https://via.placeholder.com/80" },
+            { id: 3, categoria: "Accesorios", nombre: "Cargador Carga Rápida 33W", precio: 14000, img: "https://via.placeholder.com/80" },
+            { id: 4, categoria: "Herramientas", nombre: "Set Llaves de Precisión x12", precio: 24500, img: "https://via.placeholder.com/80" }
+        ];
+
+        let carrito = {};
+        let catActual = 'todas';
+
+        function render() {
+            const list = document.getElementById('product-list');
+            const busqueda = document.getElementById('search-input').value.toLowerCase();
+            list.innerHTML = '';
+
+            productos.forEach(p => {
+                const cumpleCat = catActual === 'todas' || p.categoria === catActual;
+                const cumpleBusqueda = p.nombre.toLowerCase().includes(busqueda);
+
+                if (cumpleCat && cumpleBusqueda) {
+                    const cant = carrito[p.id] || 0;
+                    list.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.img}" alt="${p.nombre}">
+                            <div class="product-info">
+                                <span class="tag">${p.categoria}</span>
+                                <h3>${p.nombre}</h3>
+                                <div class="price">$${p.precio.toLocaleString('es-AR')}</div>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="cambiarCant(${p.id}, -1)">-</button>
+                                <span class="qty-num">${cant}</span>
+                                <button class="qty-btn" onclick="cambiarCant(${p.id}, 1)">+</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            actualizarBarra();
+        }
+
+        function cambiarCant(id, delta) {
+            const actual = carrito[id] || 0;
+            const nueva = actual + delta;
+            if (nueva <= 0) delete carrito[id];
+            else carrito[id] = nueva;
+            render();
+        }
+
+        function filtrar() { render(); }
+
+        function filtrarCategoria(cat, btn) {
+            catActual = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+        }
+
+        function calcularTotal() {
+            let total = 0;
+            let count = 0;
+            for (let id in carrito) {
+                const p = productos.find(item => item.id == id);
+                total += p.precio * carrito[id];
+                count += carrito[id];
+            }
+            return { total, count };
+        }
+
+        function actualizarBarra() {
+            const { total, count } = calcularTotal();
+            document.getElementById('bar-total').innerText = '$' + total.toLocaleString('es-AR');
+            document.getElementById('bar-count').innerText = count;
+        }
+
+        function abrirModal() {
+            const { count } = calcularTotal();
+            if (count === 0) { alert("Tu carrito está vacío."); return; }
+
+            const container = document.getElementById('modal-items');
+            container.innerHTML = '';
+
+            for (let id in carrito) {
+                const p = productos.find(item => item.id == id);
+                const subtotal = p.precio * carrito[id];
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${p.nombre}</strong><br>
+                            <span style="color:#64748b">${carrito[id]} un. x $${p.precio.toLocaleString('es-AR')}</span>
+                        </div>
+                        <strong>$${subtotal.toLocaleString('es-AR')}</strong>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal').classList.add('open');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').classList.remove('open');
+        }
+
+        function enviarWhatsApp() {
+            const { total } = calcularTotal();
+            let texto = "Hola! Quisiera confirmar la siguiente orden de compra:\n\n";
+
+            for (let id in carrito) {
+                const p = productos.find(item => item.id == id);
+                texto += `• ${p.nombre} (x${carrito[id]}) - $${(p.precio * carrito[id]).toLocaleString('es-AR')}\n`;
+            }
+
+            texto += `\n*TOTAL A PAGAR: $${total.toLocaleString('es-AR')}*\n\n¿Me confirman stock y envío?`;
+
+            window.open(`https://wa.me/${NUMERO_WA}?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        render();
+    </script>
+</body>
+  </html>
+  
